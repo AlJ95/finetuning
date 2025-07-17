@@ -1,0 +1,4 @@
+# This file ensures the data directory is tracked by git
+# Place your audio datasets here:
+# - torstenvoicedataset2022.10.zip
+# - mls_german_opus.tar.gz
