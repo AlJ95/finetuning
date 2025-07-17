@@ -6,7 +6,7 @@
   - Grundlegende Projektordnerstruktur anlegen (data/, models/, src/, tests/)
   - _Requirements: 6.1, 6.2, 6.3_
 
-- [ ] 2. Recherche TTS-Finetuning Best Practices und Orpheus 3B Spezifika
+- [x] 2. Recherche TTS-Finetuning Best Practices und Orpheus 3B Spezifika
   - TTS-Finetuning Best Practices recherchieren (Datenqualität, Training-Parameter, Evaluation)
   - Orpheus 3B spezifische Finetuning-Anforderungen und Optimierungen dokumentieren
   - Voice-Model Training Spezifika für deutsche Sprache recherchieren
@@ -15,27 +15,29 @@
   - _Requirements: 7.1, 7.2, 7.3_
 
 
-- [ ] 3. Datenexploration der verfügbaren Datensätze
+- [x] 3. Datenexploration der verfügbaren Datensätze
   - torstenvoicedataset2022.10.zip Struktur und Format analysieren (LJSpeech-Format)
   - mls_german_opus.tar.gz Struktur und Format analysieren (Multilingual LibriSpeech)
+  - Datensätze sind in D:\Trainingsdaten\TTS
   - Datenqualität, Umfang und Charakteristika beider Datensätze dokumentieren
   - Kompatibilität mit Unsloth TTS-Training evaluieren
   - _Requirements: 1.1, 8.1, 8.2_
   - _Links: https://www.thorsten-voice.de/en/datasets-2/, https://zenodo.org/records/7265581, https://openslr.org/94/, https://huggingface.co/datasets/facebook/multilingual_librispeech_
 
-- [ ] 4. Implementiere abstrakte DataProcessor Basisklasse
+- [x] 4. Implementiere abstrakte DataProcessor Basisklasse
+
   - Abstrakte DataProcessor Klasse mit standardisierten Interfaces definieren
   - Gemeinsame Funktionalitäten für Audio-Metadaten-Extraktion implementieren
   - Basis-Qualitätsvalidierung und Batch-Processing Framework
   - _Requirements: 3.1, 3.4_
 
-- [ ] 5. Implementiere TorstenVoiceDataProcessor für Thorsten-Voice Dataset
+- [x] 5. Implementiere TorstenVoiceDataProcessor für Thorsten-Voice Dataset
   - Spezifische Implementierung für LJSpeech-Format (torstenvoicedataset2022.10.zip)
   - Audio-Text-Alignment für Thorsten-Voice spezifische Struktur
   - Qualitätsfilterung basierend auf Dataset-Charakteristika
   - _Requirements: 1.1, 1.2, 1.3, 8.1, 8.2_
 
-- [ ] 6. Implementiere MLSGermanDataProcessor für Multilingual LibriSpeech
+- [x] 6. Implementiere MLSGermanDataProcessor für Multilingual LibriSpeech
   - Spezifische Implementierung für MLS-Format (mls_german_opus.tar.gz)
   - Multi-Speaker Datenverarbeitung und Speaker-ID Extraktion
   - MLS-spezifische Qualitätsvalidierung und Filterung
