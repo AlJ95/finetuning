@@ -43,7 +43,9 @@
   - MLS-spezifische Qualitätsvalidierung und Filterung
   - _Requirements: 1.1, 1.2, 1.3, 8.1, 8.2_
 
-- [ ] 7. Entwicke Unsloth-Integration für Orpheus 3B
+- [x] 7. Entwicke Unsloth-Integration für Orpheus 3B
+
+
   - Orpheus 3B Modell mit Unsloth laden und konfigurieren
   - Dataset-Formatierung für Unsloth-kompatibles Training
   - TrainingConfig Dataclass mit Unsloth-spezifischen Parametern

@@ -1,2 +1,5 @@
 .venv/
 venv/
+
+*.cpython-312.pyc
+*.cpython*
