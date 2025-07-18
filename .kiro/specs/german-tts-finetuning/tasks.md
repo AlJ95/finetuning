@@ -44,8 +44,6 @@
   - _Requirements: 1.1, 1.2, 1.3, 8.1, 8.2_
 
 - [x] 7. Entwicke Unsloth-Integration für Orpheus 3B
-
-
   - Orpheus 3B Modell mit Unsloth laden und konfigurieren
   - Dataset-Formatierung für Unsloth-kompatibles Training
   - TrainingConfig Dataclass mit Unsloth-spezifischen Parametern
@@ -53,7 +51,10 @@
   - Links: https://docs.unsloth.ai/basics/text-to-speech-tts-fine-tuning, https://docs.unsloth.ai/basics/running-and-saving-models_
   - _Requirements: 2.1, 2.2, 2.3, 2.5_
 
-- [ ] 8. Implementiere TTS-spezifische Evaluation-Metriken
+- [x] 8. Implementiere TTS-spezifische Evaluation-Metriken
+
+
+
   - MOS (Mean Opinion Score) Approximation berechnen
   - Deutsche Phonem-Accuracy Messung
   - Audio-Qualitäts-Metriken (PESQ, STOI, Mel-Spektrogramm-Distanz)

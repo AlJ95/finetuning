@@ -16,6 +16,11 @@ pandas>=2.0.0
 pesq>=0.0.4
 pystoi>=0.3.3
 
+# Advanced TTS evaluation metrics
+whisperx>=3.1.0
+utmos22>=0.1.0
+speechmetrics>=1.0.0
+
 # Utilities
 tqdm>=4.65.0
 matplotlib>=3.7.0
