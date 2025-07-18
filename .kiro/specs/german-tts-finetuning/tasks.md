@@ -52,9 +52,6 @@
   - _Requirements: 2.1, 2.2, 2.3, 2.5_
 
 - [x] 8. Implementiere TTS-spezifische Evaluation-Metriken
-
-
-
   - MOS (Mean Opinion Score) Approximation berechnen
   - Deutsche Phonem-Accuracy Messung
   - Audio-Qualitäts-Metriken (PESQ, STOI, Mel-Spektrogramm-Distanz)
