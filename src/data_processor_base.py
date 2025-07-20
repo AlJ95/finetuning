@@ -65,6 +65,12 @@ class DataProcessor(ABC):
         self.config = config or ProcessingConfig()
         self.logger = logging.getLogger(self.__class__.__name__)
         self._setup_logging()
+        try:
+            from .error_handling.audio_format_handler import AudioFormatHandler
+            self.audio_handler = AudioFormatHandler()
+        except ImportError as e:
+            self.logger.warning(f"Could not initialize AudioFormatHandler: {e}")
+            self.audio_handler = None
     
     def _setup_logging(self):
         """Setup logging configuration."""
@@ -114,14 +120,16 @@ class DataProcessor(ABC):
             Dictionary containing audio metadata
         """
         try:
-            import librosa
-            import soundfile as sf
-            
-            # Load audio file info without loading the full audio
-            info = sf.info(str(audio_file))
-            
-            # Load audio for additional analysis
-            audio_data, sr = librosa.load(str(audio_file), sr=None)
+            # Try using the AudioFormatHandler if available
+            if self.audio_handler:
+                audio_data, sr = self.audio_handler.load_audio(str(audio_file))
+                info = {'duration': len(audio_data)/sr, 'samplerate': sr}
+            else:
+                # Fallback to original implementation
+                import librosa
+                import soundfile as sf
+                info = sf.info(str(audio_file))
+                audio_data, sr = librosa.load(str(audio_file), sr=None)
             
             metadata = {
                 'file_path': audio_file,
@@ -205,10 +213,13 @@ class DataProcessor(ABC):
             Tuple of (is_valid, quality_metrics)
         """
         try:
-            import librosa
-            
-            # Load audio
-            audio_data, sr = librosa.load(str(audio_file), sr=None)
+            # Try using the AudioFormatHandler if available
+            if self.audio_handler:
+                audio_data, sr = self.audio_handler.load_audio(str(audio_file))
+            else:
+                # Fallback to original implementation
+                import librosa
+                audio_data, sr = librosa.load(str(audio_file), sr=None)
             
             # Calculate quality metrics
             metrics = self.calculate_quality_metrics(audio_data, sr)

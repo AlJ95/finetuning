@@ -58,7 +58,7 @@
   - Evaluation-Report-Generator
   - _Requirements: 4.1, 4.2, 4.3, 4.4_
 
-- [ ] 9. Entwicke Model Persistence für VLLM-Kompatibilität
+- [x] 9. Entwicke Model Persistence für VLLM-Kompatibilität
   - Recherche via Perplexity welches die besten Bibliotheken, Frameworks sind dafür
   - Modell-Speicherung mit `save_method="merged_16bit"`
   - LoRA-Adapter separat speichern für weitere Entwicklung
@@ -67,7 +67,7 @@
   - Links: https://docs.unsloth.ai/basics/running-and-saving-models/saving-to-vllm, https://docs.vllm.ai/en/stable/features/lora.html_
   - _Requirements: 2.4, 2.6, 5.1, 5.2, 5.3_
 
-- [ ] 10. Erstelle sequenzielle Pipeline-Orchestrierung
+- [x] 10. Erstelle sequenzielle Pipeline-Orchestrierung
   - Recherche via Perplexity welches die besten Bibliotheken, Frameworks sind dafür
   - Pipeline-Schritte sequenziell verketten
   - Fehlerbehandlung und Recovery-Optionen

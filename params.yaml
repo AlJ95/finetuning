@@ -1,0 +1,202 @@
+# DVC Pipeline Parameters for German TTS Fine-tuning
+# This file contains all configurable parameters for the pipeline stages
+
+# Data loading stage parameters
+data_loading:
+  datasets:
+    - thorsten_voice
+    - mls_german
+  data_paths:
+    thorsten_voice: "data/raw/torstenvoicedataset2022.10/"
+    mls_german: "data/raw/mls_german_opus/"
+  max_samples_per_dataset: 10000  # Limit for testing, set to -1 for all
+  random_seed: 42
+
+# Data preprocessing parameters
+preprocessing:
+  audio:
+    target_sample_rate: 24000
+    min_duration: 1.0      # seconds
+    max_duration: 10.0     # seconds
+    min_snr: 15.0          # Signal-to-noise ratio threshold
+    quality_threshold: 0.7 # Quality score threshold (0-1)
+  
+  text:
+    min_length: 10         # Minimum text length in characters
+    max_length: 500        # Maximum text length in characters
+    remove_special_chars: true
+    normalize_text: true
+  
+  dataset_split:
+    train_ratio: 0.8
+    val_ratio: 0.2
+    test_ratio: 0.0        # We'll use validation for testing
+    stratify_by_speaker: true
+  
+  batch_processing:
+    batch_size: 100
+    max_workers: 4
+    cache_processed: true
+
+# Model configuration
+model:
+  name: "unsloth/orpheus-3b-0.1-ft"
+  max_seq_length: 8192    # Orpheus 3B is trained on sequences of length 8192
+  load_in_4bit: false     # Important for TTS quality
+  dtype: null             # Auto-detection
+  
+  # LoRA configuration
+  lora:
+    r: 16                 # LoRA rank
+    target_modules:
+      - "q_proj"
+      - "k_proj" 
+      - "v_proj"
+      - "o_proj"
+      - "gate_proj"
+      - "up_proj"
+      - "down_proj"
+    lora_alpha: 16
+    lora_dropout: 0.0
+    bias: "none"
+    use_rslora: false
+
+# Training stage parameters
+training:
+  # Training hyperparameters
+  num_train_epochs: 3
+  per_device_train_batch_size: 1
+  gradient_accumulation_steps: 4
+  learning_rate: 2.0e-4
+  weight_decay: 0.01
+  warmup_steps: 5
+  lr_scheduler_type: "linear"
+  optim: "adamw_8bit"
+  max_steps: -1           # -1 means train for full epochs
+  
+  # Memory optimization
+  use_gradient_checkpointing: "unsloth"
+  dataloader_num_workers: 0
+  remove_unused_columns: false
+  group_by_length: true
+  
+  # Logging and saving
+  logging_steps: 1
+  save_steps: 500
+  save_total_limit: 3
+  report_to: "none"       # Can be changed to "mlflow" for experiment tracking
+  
+  # Output directories
+  output_dir: "models/checkpoints"
+  logging_dir: "models/training_logs"
+  
+  # Early stopping
+  early_stopping:
+    enabled: false
+    patience: 3
+    min_delta: 0.001
+
+# Evaluation stage parameters  
+evaluation:
+  metrics:
+    # Audio quality metrics
+    calculate_pesq: true
+    calculate_stoi: true
+    calculate_mos: true
+    
+    # German-specific metrics
+    phoneme_accuracy: true
+    prosody_analysis: true
+    
+    # Model performance metrics
+    inference_speed: true
+    memory_usage: true
+  
+  # Evaluation dataset
+  eval_samples: 100       # Number of samples to evaluate (-1 for all)
+  batch_size: 8
+  
+  # Output configuration
+  save_audio_samples: true
+  num_audio_samples: 10   # Number of audio samples to save
+  generate_plots: true
+  detailed_report: true
+
+# Model persistence parameters
+persistence:
+  # VLLM compatibility
+  vllm_compatible: true
+  save_method: "merged_16bit"  # Optimal for VLLM
+  
+  # Save options
+  save_merged_model: true
+  save_lora_adapters: true
+  save_tokenizer: true
+  
+  # Model registry
+  model_name: "german-tts-orpheus-3b"
+  model_version: "v1.0"
+  model_description: "German TTS model fine-tuned with Orpheus 3B"
+  
+  # Hugging Face integration
+  huggingface:
+    upload_to_hub: false
+    repo_name: null       # Will be set if uploading
+    private_repo: true
+    commit_message: "Upload German TTS model"
+  
+  # Compression and optimization
+  quantization:
+    enabled: false
+    method: "4bit"        # 4bit, 8bit, or none
+  
+  # Validation
+  validate_vllm_compatibility: true
+  run_inference_test: true
+
+# MLflow experiment tracking (optional)
+mlflow:
+  enabled: false
+  experiment_name: "german-tts-finetuning"
+  tracking_uri: "mlruns"  # Local MLflow tracking
+  
+  # What to log
+  log_params: true
+  log_metrics: true
+  log_models: true
+  log_artifacts: true
+  
+  # Tags for organization
+  tags:
+    project: "german-tts"
+    model_type: "orpheus-3b"
+    framework: "unsloth"
+
+# Logging configuration
+logging:
+  level: "INFO"           # DEBUG, INFO, WARNING, ERROR
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  log_to_file: true
+  log_file: "logs/pipeline.log"
+
+# Resource management
+resources:
+  # Memory limits
+  max_memory_gb: 32       # Maximum memory usage
+  gpu_memory_fraction: 0.9
+  
+  # Disk space management
+  cleanup_intermediate: false  # Keep intermediate files for debugging
+  max_disk_usage_gb: 500
+  
+  # Parallel processing
+  max_parallel_workers: 4
+  use_multiprocessing: true
+
+# Development and debugging
+debug:
+  enabled: false
+  sample_dataset: true    # Use small subset for debugging
+  sample_size: 100
+  verbose_logging: false
+  profile_performance: false

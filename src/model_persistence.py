@@ -13,6 +13,14 @@ import json
 import os
 from datetime import datetime
 
+# PyTorch import
+try:
+    import torch
+    TORCH_AVAILABLE = True
+except ImportError:
+    TORCH_AVAILABLE = False
+    logging.warning("PyTorch not available")
+
 # Optional imports for Hugging Face Hub
 try:
     from huggingface_hub import HfApi, create_repo, upload_folder

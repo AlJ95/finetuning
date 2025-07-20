@@ -173,13 +173,25 @@ class UnslothTrainer:
         self.tokenizer = None
         self.trainer = None
         
+        # Initialize memory manager
+        try:
+            from .error_handling.memory_manager import MemoryManager
+            self.memory_manager = MemoryManager()
+        except ImportError as e:
+            self.logger.warning(f"Could not initialize MemoryManager: {e}")
+            self.memory_manager = None
+        
         # Initialize device and memory tracking
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.logger.info(f"Using device: {self.device}")
         
         if torch.cuda.is_available():
             self.logger.info(f"GPU: {torch.cuda.get_device_name()}")
-            self.logger.info(f"CUDA Memory: {torch.cuda.get_device_properties(0).total_memory / 1e9:.1f} GB")
+            if self.memory_manager:
+                mem_stats = self.memory_manager.get_memory_stats()
+                self.logger.info(f"CUDA Memory: Allocated: {mem_stats.get('allocated', 0):.1f}GB, Total: {mem_stats.get('total', 0):.1f}GB")
+            else:
+                self.logger.info(f"CUDA Memory: {torch.cuda.get_device_properties(0).total_memory / 1e9:.1f} GB")
     
     def _setup_logging(self):
         """Setup logging configuration."""
@@ -385,9 +397,15 @@ class UnslothTrainer:
         
         # Track memory before training
         if torch.cuda.is_available():
-            torch.cuda.empty_cache()
-            memory_before = torch.cuda.memory_allocated()
-            self.logger.info(f"GPU memory before training: {memory_before / 1e9:.2f} GB")
+            if self.memory_manager:
+                self.memory_manager.clear_cache()
+                mem_stats = self.memory_manager.get_memory_stats()
+                self.logger.info(f"GPU memory before training: Allocated: {mem_stats['allocated']:.2f}GB, Total: {mem_stats['total']:.2f}GB")
+                memory_before = mem_stats['allocated']
+            else:
+                torch.cuda.empty_cache()
+                memory_before = torch.cuda.memory_allocated()
+                self.logger.info(f"GPU memory before training: {memory_before / 1e9:.2f} GB")
         
         # Start training
         import time
@@ -403,14 +421,23 @@ class UnslothTrainer:
             # Track memory after training
             memory_stats = {}
             if torch.cuda.is_available():
-                memory_after = torch.cuda.memory_allocated()
-                memory_stats = {
-                    'memory_before_gb': memory_before / 1e9,
-                    'memory_after_gb': memory_after / 1e9,
-                    'memory_peak_gb': torch.cuda.max_memory_allocated() / 1e9
-                }
-                self.logger.info(f"GPU memory after training: {memory_after / 1e9:.2f} GB")
-                self.logger.info(f"Peak GPU memory: {memory_stats['memory_peak_gb']:.2f} GB")
+                if self.memory_manager:
+                    mem_stats = self.memory_manager.get_memory_stats()
+                    memory_stats = {
+                        'memory_before_gb': memory_before / 1e9,
+                        'memory_after_gb': mem_stats['allocated'],
+                        'memory_peak_gb': mem_stats['peak_allocated']
+                    }
+                    self.logger.info(f"GPU memory after training: Allocated: {mem_stats['allocated']:.2f}GB, Peak: {mem_stats['peak_allocated']:.2f}GB")
+                else:
+                    memory_after = torch.cuda.memory_allocated()
+                    memory_stats = {
+                        'memory_before_gb': memory_before / 1e9,
+                        'memory_after_gb': memory_after / 1e9,
+                        'memory_peak_gb': torch.cuda.max_memory_allocated() / 1e9
+                    }
+                    self.logger.info(f"GPU memory after training: {memory_after / 1e9:.2f} GB")
+                    self.logger.info(f"Peak GPU memory: {memory_stats['memory_peak_gb']:.2f} GB")
             
             # Save model and tokenizer
             model_path = Path(self.config.output_dir) / "lora_model"

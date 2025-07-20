@@ -1,0 +1,103 @@
+# DVC Pipeline Configuration for German TTS Fine-tuning
+# This pipeline orchestrates data processing, training, evaluation, and model persistence
+
+stages:
+  data_loading:
+    cmd: python -m src.pipeline.data_loading_stage
+    deps:
+      - src/pipeline/data_loading_stage.py
+      - src/torsten_voice_processor.py
+      - src/mls_german_processor.py
+      - params.yaml
+    params:
+      - data_loading
+    outs:
+      - data/processed/dataset_info.json
+      - data/processed/thorsten_voice/
+      - data/processed/mls_german/
+    desc: "Load and initial processing of German TTS datasets"
+
+  data_preprocessing:
+    cmd: python -m src.pipeline.preprocessing_stage
+    deps:
+      - src/pipeline/preprocessing_stage.py
+      - src/data_processor_base.py
+      - data/processed/dataset_info.json
+      - params.yaml
+    params:
+      - preprocessing
+    outs:
+      - data/preprocessed/train_dataset.pkl
+      - data/preprocessed/val_dataset.pkl
+      - data/preprocessed/preprocessing_stats.json
+    desc: "Data preprocessing, filtering, and quality validation"
+
+  training:
+    cmd: python -m src.pipeline.training_stage
+    deps:
+      - src/pipeline/training_stage.py
+      - src/unsloth_trainer.py
+      - data/preprocessed/train_dataset.pkl
+      - data/preprocessed/val_dataset.pkl
+      - params.yaml
+    params:
+      - training
+      - model
+    outs:
+      - models/checkpoints/
+      - models/training_logs/
+      - models/lora_adapters/
+    metrics:
+      - metrics/training_metrics.json
+    desc: "Fine-tune Orpheus 3B model with Unsloth"
+
+  evaluation:
+    cmd: python -m src.pipeline.evaluation_stage
+    deps:
+      - src/pipeline/evaluation_stage.py
+      - src/tts_evaluator_clean.py
+      - models/lora_adapters/
+      - data/preprocessed/val_dataset.pkl
+      - params.yaml
+    params:
+      - evaluation
+    outs:
+      - results/evaluation/
+    metrics:
+      - metrics/evaluation_metrics.json
+    plots:
+      - plots/evaluation_plots.json
+    desc: "Evaluate trained model with TTS-specific metrics"
+
+  model_persistence:
+    cmd: python -m src.pipeline.persistence_stage
+    deps:
+      - src/pipeline/persistence_stage.py
+      - src/model_persistence.py
+      - models/lora_adapters/
+      - metrics/evaluation_metrics.json
+      - params.yaml
+    params:
+      - persistence
+    outs:
+      - models/vllm_compatible/
+      - models/deployment_ready/
+      - models/model_registry.json
+    desc: "Save model in VLLM-compatible format and prepare for deployment"
+
+# Pipeline plots configuration
+plots:
+  - plots/training_loss.json:
+      x: step
+      y: loss
+      title: "Training Loss Over Time"
+  
+  - plots/evaluation_metrics.json:
+      x: metric
+      y: value
+      title: "TTS Evaluation Metrics"
+
+# Metrics configuration
+metrics:
+  - metrics/training_metrics.json
+  - metrics/evaluation_metrics.json
