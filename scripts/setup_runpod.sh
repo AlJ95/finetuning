@@ -22,9 +22,9 @@ nvidia-smi
 echo "Erstelle Python Environment..."
 python3 -m pip install --upgrade pip
 
-# PyTorch mit CUDA Support
-echo "Installiere PyTorch mit CUDA..."
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+# PyTorch mit CUDA Support if needed - usually preinstalled by docker image
+# echo "Installiere PyTorch mit CUDA..."
+# pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 
 # Unsloth Installation (TTS-spezifisch)
 echo "Installiere Unsloth für TTS..."
